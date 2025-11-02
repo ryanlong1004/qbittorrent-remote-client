@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "qbittorrent-remote-client"
-version = "0.2.0"
+version = "0.2.1"
 authors = [{ name = "rlong", email = "rlong@example.com" }]
 description = "A Python-based command-line tool for remotely managing qBittorrent instances via the Web API"
 readme = "README.md"
