@@ -1,0 +1,9 @@
+{
+  "host": "localhost",
+  "port": 8080,
+  "username": "admin",
+  "password": "your_password_here",
+  "use_https": false,
+  "timeout": 30,
+  "verify_ssl": true
+}
