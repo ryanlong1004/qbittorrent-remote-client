@@ -90,10 +90,11 @@ def cli(ctx, config):
         sys.exit(1)
 
 
-@cli.command()
+@cli.command("list")
 @click.option(
     "--filter",
     "-f",
+    "filter_type",
     default="all",
     help="Filter torrents (all, downloading, seeding, completed, paused)",
 )
@@ -105,12 +106,14 @@ def cli(ctx, config):
 )
 @click.option("--reverse", "-r", is_flag=True, help="Reverse sort order")
 @click.pass_context
-def list(ctx, filter, sort, reverse):
+def list_torrents(ctx, filter_type, sort, reverse):
     """List torrents"""
     client = ctx.obj["client"]
 
     try:
-        torrents = client.get_torrents(filter_type=filter, sort=sort, reverse=reverse)
+        torrents = client.get_torrents(
+            filter_type=filter_type, sort=sort, reverse=reverse
+        )
 
         if not torrents:
             console.print("[yellow]No torrents found[/yellow]")
@@ -264,7 +267,7 @@ def stats(ctx):
 @click.pass_context
 def interactive(ctx):
     """Interactive mode"""
-    client = ctx.obj["client"]
+    # client = ctx.obj["client"]  # Available if needed for interactive commands
 
     console.print("[bold blue]qBittorrent Interactive Mode[/bold blue]")
     console.print("Type 'help' for available commands or 'quit' to exit")
