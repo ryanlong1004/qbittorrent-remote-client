@@ -29,7 +29,7 @@ A Python-based command-line tool for remotely managing qBittorrent instances via
 - 🖥️ **Comprehensive Status Dashboard** - Real-time monitoring with rich formatted display
 - 📋 **List and Filter Torrents** - View torrents with detailed information and filtering
 - ➕ **Add Torrents** - From magnet links, URLs, or torrent files
-- ⏸️ **Control Torrents** - Pause, resume, and delete operationsgit sta
+- ⏸️ **Control Torrents** - Pause, resume, and delete operations
 - 🗑️ **Bulk Operations** - Delete torrents by status (error, missingFiles, etc.)
 - 📊 **Transfer Statistics** - Global transfer info and session statistics
 - 🔄 **Auto-refresh Mode** - Real-time monitoring with configurable refresh intervals
