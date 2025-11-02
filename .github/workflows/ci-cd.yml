@@ -3,6 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main, develop, feature/testing-and-cicd ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main ]
 
@@ -153,7 +154,7 @@ jobs:
   build-and-publish:
     runs-on: ubuntu-latest
     needs: [test, security, type-check]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
 
     steps:
     - uses: actions/checkout@v4
