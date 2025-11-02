@@ -1,12 +1,11 @@
-"""Tests for qbt_client.py"""
+"""Tests for qbittorrent_remote_client.qbt_client"""
 
 from unittest.mock import Mock, patch
 
-import pytest
 from click.testing import CliRunner
 
-from qbt_api import QBittorrentError
-from qbt_client import cli, format_eta, format_size, format_speed
+from qbittorrent_remote_client.qbt_api import QBittorrentError
+from qbittorrent_remote_client.qbt_client import cli, format_eta, format_size, format_speed
 
 
 class TestUtilityFunctions:
@@ -43,7 +42,7 @@ class TestCLICommands:
         """Set up test method."""
         self.runner = CliRunner()
 
-    @patch("qbt_client.create_client_from_config")
+    @patch("qbittorrent_remote_client.qbt_client.create_client_from_config")
     def test_list_command_success(self, mock_create_client, sample_torrents):
         """Test list command success."""
         mock_client = Mock()
@@ -59,7 +58,7 @@ class TestCLICommands:
         # State might be truncated in the table
         assert "downloa" in result.output  # truncated "downloading"
 
-    @patch("qbt_client.create_client_from_config")
+    @patch("qbittorrent_remote_client.qbt_client.create_client_from_config")
     def test_list_command_error(self, mock_create_client):
         """Test list command with error."""
         mock_client = Mock()
@@ -71,7 +70,7 @@ class TestCLICommands:
         assert result.exit_code == 0
         assert "Error listing torrents" in result.output
 
-    @patch("qbt_client.create_client_from_config")
+    @patch("qbittorrent_remote_client.qbt_client.create_client_from_config")
     def test_list_command_with_filters(self, mock_create_client, sample_torrents):
         """Test list command with filters."""
         mock_client = Mock()
@@ -83,7 +82,7 @@ class TestCLICommands:
         assert result.exit_code == 0
         mock_client.get_torrents.assert_called_with(filter="downloading", category="Movies", sort="name", reverse=False)
 
-    @patch("qbt_client.create_client_from_config")
+    @patch("qbittorrent_remote_client.qbt_client.create_client_from_config")
     def test_stats_command(self, mock_create_client, sample_transfer_info):
         """Test stats command."""
         mock_client = Mock()
@@ -97,7 +96,7 @@ class TestCLICommands:
         assert "v4.6.3" in result.output
         assert "1.0 MB/s" in result.output
 
-    @patch("qbt_client.create_client_from_config")
+    @patch("qbittorrent_remote_client.qbt_client.create_client_from_config")
     def test_status_command(
         self,
         mock_create_client,
@@ -123,7 +122,7 @@ class TestCLICommands:
         assert "Server Information" in result.output
         assert "v4.6.3" in result.output
 
-    @patch("qbt_client.create_client_from_config")
+    @patch("qbittorrent_remote_client.qbt_client.create_client_from_config")
     def test_pause_command(self, mock_create_client):
         """Test pause command."""
         mock_client = Mock()
@@ -135,7 +134,7 @@ class TestCLICommands:
         assert result.exit_code == 0
         mock_client.pause_torrents.assert_called_with(["abc123"])
 
-    @patch("qbt_client.create_client_from_config")
+    @patch("qbittorrent_remote_client.qbt_client.create_client_from_config")
     def test_resume_command(self, mock_create_client):
         """Test resume command."""
         mock_client = Mock()
@@ -147,7 +146,7 @@ class TestCLICommands:
         assert result.exit_code == 0
         mock_client.resume_torrents.assert_called_with(["abc123"])
 
-    @patch("qbt_client.create_client_from_config")
+    @patch("qbittorrent_remote_client.qbt_client.create_client_from_config")
     def test_delete_command(self, mock_create_client):
         """Test delete command."""
         mock_client = Mock()
@@ -159,7 +158,7 @@ class TestCLICommands:
         assert result.exit_code == 0
         mock_client.delete_torrents.assert_called_with(["abc123"], delete_files=False)
 
-    @patch("qbt_client.create_client_from_config")
+    @patch("qbittorrent_remote_client.qbt_client.create_client_from_config")
     def test_delete_command_with_files(self, mock_create_client):
         """Test delete command with files."""
         mock_client = Mock()
@@ -171,7 +170,7 @@ class TestCLICommands:
         assert result.exit_code == 0
         mock_client.delete_torrents.assert_called_with(["abc123"], delete_files=True)
 
-    @patch("qbt_client.create_client_from_config")
+    @patch("qbittorrent_remote_client.qbt_client.create_client_from_config")
     def test_delete_by_status_dry_run(self, mock_create_client, sample_torrents):
         """Test delete-by-status with dry run."""
         mock_client = Mock()
@@ -184,7 +183,7 @@ class TestCLICommands:
         assert "DRY RUN" in result.output
         assert "Test Torrent 3" in result.output
 
-    @patch("qbt_client.create_client_from_config")
+    @patch("qbittorrent_remote_client.qbt_client.create_client_from_config")
     def test_delete_by_status_with_confirmation(self, mock_create_client, sample_torrents):
         """Test delete-by-status with user confirmation."""
         mock_client = Mock()
@@ -197,7 +196,7 @@ class TestCLICommands:
         assert result.exit_code == 0
         mock_client.delete_torrents.assert_called()
 
-    @patch("qbt_client.create_client_from_config")
+    @patch("qbittorrent_remote_client.qbt_client.create_client_from_config")
     def test_add_command_url(self, mock_create_client):
         """Test add command with URL."""
         mock_client = Mock()
@@ -210,7 +209,7 @@ class TestCLICommands:
         assert result.exit_code == 0
         mock_client.add_torrent_url.assert_called()
 
-    @patch("qbt_client.create_client_from_config")
+    @patch("qbittorrent_remote_client.qbt_client.create_client_from_config")
     def test_add_command_with_valid_category(self, mock_create_client):
         """Test add command with valid category."""
         mock_client = Mock()
@@ -228,7 +227,7 @@ class TestCLICommands:
         assert "to category 'Films'" in result.output
         mock_client.add_torrent_url.assert_called_with(test_url, save_path="", category="Films", paused=False)
 
-    @patch("qbt_client.create_client_from_config")
+    @patch("qbittorrent_remote_client.qbt_client.create_client_from_config")
     def test_add_command_with_invalid_category(self, mock_create_client):
         """Test add command with invalid category."""
         mock_client = Mock()
@@ -248,7 +247,7 @@ class TestCLICommands:
         assert "Music" in result.output
         mock_client.add_torrent_url.assert_not_called()
 
-    @patch("qbt_client.create_client_from_config")
+    @patch("qbittorrent_remote_client.qbt_client.create_client_from_config")
     def test_add_command_category_validation_error(self, mock_create_client):
         """Test add command when category validation fails."""
         mock_client = Mock()
@@ -263,7 +262,7 @@ class TestCLICommands:
         assert "Warning: Could not validate category" in result.output
         mock_client.add_torrent_url.assert_called_with(test_url, save_path="", category="Films", paused=False)
 
-    @patch("qbt_client.create_client_from_config")
+    @patch("qbittorrent_remote_client.qbt_client.create_client_from_config")
     def test_categories_command_success(self, mock_create_client):
         """Test categories command success."""
         mock_client = Mock()
@@ -285,7 +284,7 @@ class TestCLICommands:
         assert "/music" in result.output
         assert "Default" in result.output  # For empty save path
 
-    @patch("qbt_client.create_client_from_config")
+    @patch("qbittorrent_remote_client.qbt_client.create_client_from_config")
     def test_categories_command_no_categories(self, mock_create_client):
         """Test categories command when no categories exist."""
         mock_client = Mock()
@@ -297,7 +296,7 @@ class TestCLICommands:
         assert result.exit_code == 0
         assert "No categories found" in result.output
 
-    @patch("qbt_client.create_client_from_config")
+    @patch("qbittorrent_remote_client.qbt_client.create_client_from_config")
     def test_categories_command_error(self, mock_create_client):
         """Test categories command with error."""
         mock_client = Mock()
@@ -311,9 +310,9 @@ class TestCLICommands:
 
     def test_config_file_option(self):
         """Test custom config file option."""
-        with patch("qbt_client.create_client_from_config") as mock_create:
+        with patch("qbittorrent_remote_client.qbt_client.create_client_from_config") as mock_create:
             mock_create.return_value = Mock()
 
-            result = self.runner.invoke(cli, ["-c", "custom.json", "list"])
+            self.runner.invoke(cli, ["-c", "custom.json", "list"])
 
             mock_create.assert_called_with("custom.json")

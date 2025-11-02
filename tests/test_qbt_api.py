@@ -1,4 +1,4 @@
-"""Tests for qbt_api.py"""
+"""Tests for qbittorrent_remote_client.qbt_api"""
 
 import json
 from unittest.mock import mock_open, patch
@@ -6,12 +6,11 @@ from unittest.mock import mock_open, patch
 import pytest
 import requests
 
-from qbt_api import (
+from qbittorrent_remote_client.qbt_api import (
     QBittorrentAPI,
     QBittorrentAPIError,
     QBittorrentAuthenticationError,
     QBittorrentConnectionError,
-    QBittorrentError,
     create_client_from_config,
     load_config,
 )
@@ -199,7 +198,7 @@ class TestConfigFunctions:
             "password": "pass",
         }
 
-        with patch("qbt_api.load_config", return_value=config_data):
+        with patch("qbittorrent_remote_client.qbt_api.load_config", return_value=config_data):
             client = create_client_from_config("test.json")
 
         assert client.host == "example.com"

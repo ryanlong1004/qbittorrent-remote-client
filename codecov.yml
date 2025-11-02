@@ -34,5 +34,4 @@ ignore:
 flags:
   unittests:
     paths:
-      - qbt_api.py
-      - qbt_client.py
+      - qbittorrent_remote_client/

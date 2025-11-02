@@ -4,7 +4,7 @@
 Simple example showing how to use the qBittorrent API
 """
 
-from qbt_api import QBittorrentAPI, create_client_from_config
+from qbittorrent_remote_client.qbt_api import create_client_from_config
 
 
 def example_basic_usage():

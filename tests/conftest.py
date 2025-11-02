@@ -3,7 +3,7 @@
 import pytest
 import requests_mock
 
-from qbt_api import QBittorrentAPI
+from qbittorrent_remote_client.qbt_api import QBittorrentAPI
 
 
 @pytest.fixture

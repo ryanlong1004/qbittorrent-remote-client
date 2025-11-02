@@ -68,11 +68,11 @@ jobs:
 
     - name: Lint with pylint
       run: |
-        pylint qbt_api.py qbt_client.py qbittorrent_remote_client/ --exit-zero
+        pylint qbittorrent_remote_client/ --exit-zero
 
     - name: Test with pytest
       run: |
-        pytest -v --cov=qbt_api --cov=qbt_client --cov-report=xml --cov-report=term-missing
+        pytest -v --cov=qbittorrent_remote_client --cov-report=xml --cov-report=term-missing
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
@@ -124,7 +124,7 @@ jobs:
 
     - name: Type check with mypy
       run: |
-        mypy qbt_api.py qbt_client.py --ignore-missing-imports || true
+        mypy qbittorrent_remote_client/ --ignore-missing-imports || true
 
   integration-test:
     runs-on: ubuntu-latest

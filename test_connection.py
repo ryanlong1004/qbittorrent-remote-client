@@ -4,10 +4,9 @@
 Test script for qBittorrent Remote Client
 """
 
-import os
 import sys
 
-from qbt_api import QBittorrentAPI
+from qbittorrent_remote_client.qbt_api import QBittorrentAPI
 
 
 def test_connection():
@@ -16,7 +15,7 @@ def test_connection():
 
     # Try to load config
     try:
-        from qbt_api import create_client_from_config
+        from qbittorrent_remote_client.qbt_api import create_client_from_config
 
         client = create_client_from_config()
         print("✓ Config loaded successfully")

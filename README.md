@@ -44,10 +44,10 @@ Get a comprehensive overview of your qBittorrent instance:
 
 ```bash
 # One-time status check
-python qbt_client.py status
+qbt-client status
 
 # Auto-refresh every 5 seconds for monitoring
-python qbt_client.py status --refresh 5
+qbt-client status --refresh 5
 ```
 
 The dashboard shows:
@@ -241,7 +241,6 @@ If you prefer to run as a Python module:
 # List all torrents
 python -m qbittorrent_remote_client.qbt_client list
 
-# Or if using from source directory
-# Or if using from source directory
-python qbt_client.py list
+# Or if using development environment with source
+qbt-client list
 ```

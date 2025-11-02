@@ -84,7 +84,7 @@ disable = [
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-ra --strict-markers --strict-config --cov=qbt_api --cov=qbt_client --cov-report=term-missing --cov-report=html --cov-report=xml"
+addopts = "-ra --strict-markers --strict-config --cov=qbittorrent_remote_client --cov-report=term-missing --cov-report=html --cov-report=xml"
 testpaths = ["tests"]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
