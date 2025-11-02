@@ -78,14 +78,10 @@ class TestCLICommands:
         mock_client.get_torrents.return_value = sample_torrents
         mock_create_client.return_value = mock_client
 
-        result = self.runner.invoke(
-            cli, ["list", "--filter", "downloading", "--category", "Movies"]
-        )
+        result = self.runner.invoke(cli, ["list", "--filter", "downloading", "--category", "Movies"])
 
         assert result.exit_code == 0
-        mock_client.get_torrents.assert_called_with(
-            filter="downloading", category="Movies", sort="name", reverse=False
-        )
+        mock_client.get_torrents.assert_called_with(filter="downloading", category="Movies", sort="name", reverse=False)
 
     @patch("qbt_client.create_client_from_config")
     def test_stats_command(self, mock_create_client, sample_transfer_info):
@@ -170,9 +166,7 @@ class TestCLICommands:
         mock_client.delete_torrents.return_value = True
         mock_create_client.return_value = mock_client
 
-        result = self.runner.invoke(
-            cli, ["delete", "--delete-files", "abc123"], input="y\n"
-        )
+        result = self.runner.invoke(cli, ["delete", "--delete-files", "abc123"], input="y\n")
 
         assert result.exit_code == 0
         mock_client.delete_torrents.assert_called_with(["abc123"], delete_files=True)
@@ -191,9 +185,7 @@ class TestCLICommands:
         assert "Test Torrent 3" in result.output
 
     @patch("qbt_client.create_client_from_config")
-    def test_delete_by_status_with_confirmation(
-        self, mock_create_client, sample_torrents
-    ):
+    def test_delete_by_status_with_confirmation(self, mock_create_client, sample_torrents):
         """Test delete-by-status with user confirmation."""
         mock_client = Mock()
         mock_client.get_torrents.return_value = [sample_torrents[2]]  # error torrent
@@ -234,9 +226,7 @@ class TestCLICommands:
 
         assert result.exit_code == 0
         assert "to category 'Films'" in result.output
-        mock_client.add_torrent_url.assert_called_with(
-            test_url, save_path="", category="Films", paused=False
-        )
+        mock_client.add_torrent_url.assert_called_with(test_url, save_path="", category="Films", paused=False)
 
     @patch("qbt_client.create_client_from_config")
     def test_add_command_with_invalid_category(self, mock_create_client):
@@ -249,9 +239,7 @@ class TestCLICommands:
         mock_create_client.return_value = mock_client
 
         test_url = "magnet:?xt=urn:btih:test"
-        result = self.runner.invoke(
-            cli, ["add", test_url, "--category", "InvalidCategory"]
-        )
+        result = self.runner.invoke(cli, ["add", test_url, "--category", "InvalidCategory"])
 
         assert result.exit_code == 0
         assert "Invalid category 'InvalidCategory'" in result.output
@@ -264,9 +252,7 @@ class TestCLICommands:
     def test_add_command_category_validation_error(self, mock_create_client):
         """Test add command when category validation fails."""
         mock_client = Mock()
-        mock_client.get_categories.side_effect = QBittorrentError(
-            "Cannot get categories"
-        )
+        mock_client.get_categories.side_effect = QBittorrentError("Cannot get categories")
         mock_client.add_torrent_url.return_value = True
         mock_create_client.return_value = mock_client
 
@@ -275,9 +261,7 @@ class TestCLICommands:
 
         assert result.exit_code == 0
         assert "Warning: Could not validate category" in result.output
-        mock_client.add_torrent_url.assert_called_with(
-            test_url, save_path="", category="Films", paused=False
-        )
+        mock_client.add_torrent_url.assert_called_with(test_url, save_path="", category="Films", paused=False)
 
     @patch("qbt_client.create_client_from_config")
     def test_categories_command_success(self, mock_create_client):
