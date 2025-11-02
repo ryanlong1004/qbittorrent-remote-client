@@ -210,6 +210,105 @@ class TestCLICommands:
         assert result.exit_code == 0
         mock_client.add_torrent_url.assert_called()
 
+    @patch("qbt_client.create_client_from_config")
+    def test_add_command_with_valid_category(self, mock_create_client):
+        """Test add command with valid category."""
+        mock_client = Mock()
+        mock_client.get_categories.return_value = {
+            "Films": {"savePath": "/movies"},
+            "Music": {"savePath": "/music"},
+        }
+        mock_client.add_torrent_url.return_value = True
+        mock_create_client.return_value = mock_client
+
+        test_url = "magnet:?xt=urn:btih:test"
+        result = self.runner.invoke(cli, ["add", test_url, "--category", "Films"])
+
+        assert result.exit_code == 0
+        assert "to category 'Films'" in result.output
+        mock_client.add_torrent_url.assert_called_with(test_url, save_path="", category="Films", paused=False)
+
+    @patch("qbt_client.create_client_from_config")
+    def test_add_command_with_invalid_category(self, mock_create_client):
+        """Test add command with invalid category."""
+        mock_client = Mock()
+        mock_client.get_categories.return_value = {
+            "Films": {"savePath": "/movies"},
+            "Music": {"savePath": "/music"},
+        }
+        mock_create_client.return_value = mock_client
+
+        test_url = "magnet:?xt=urn:btih:test"
+        result = self.runner.invoke(cli, ["add", test_url, "--category", "InvalidCategory"])
+
+        assert result.exit_code == 0
+        assert "Invalid category 'InvalidCategory'" in result.output
+        assert "Available categories:" in result.output
+        assert "Films" in result.output
+        assert "Music" in result.output
+        mock_client.add_torrent_url.assert_not_called()
+
+    @patch("qbt_client.create_client_from_config")
+    def test_add_command_category_validation_error(self, mock_create_client):
+        """Test add command when category validation fails."""
+        mock_client = Mock()
+        mock_client.get_categories.side_effect = QBittorrentError("Cannot get categories")
+        mock_client.add_torrent_url.return_value = True
+        mock_create_client.return_value = mock_client
+
+        test_url = "magnet:?xt=urn:btih:test"
+        result = self.runner.invoke(cli, ["add", test_url, "--category", "Films"])
+
+        assert result.exit_code == 0
+        assert "Warning: Could not validate category" in result.output
+        mock_client.add_torrent_url.assert_called_with(test_url, save_path="", category="Films", paused=False)
+
+    @patch("qbt_client.create_client_from_config")
+    def test_categories_command_success(self, mock_create_client):
+        """Test categories command success."""
+        mock_client = Mock()
+        mock_client.get_categories.return_value = {
+            "Films": {"savePath": "/movies"},
+            "Music": {"savePath": "/music"},
+            "Series": {"savePath": ""},
+        }
+        mock_create_client.return_value = mock_client
+
+        result = self.runner.invoke(cli, ["categories"])
+
+        assert result.exit_code == 0
+        assert "Available Categories:" in result.output
+        assert "Films" in result.output
+        assert "Music" in result.output
+        assert "Series" in result.output
+        assert "/movies" in result.output
+        assert "/music" in result.output
+        assert "Default" in result.output  # For empty save path
+
+    @patch("qbt_client.create_client_from_config")
+    def test_categories_command_no_categories(self, mock_create_client):
+        """Test categories command when no categories exist."""
+        mock_client = Mock()
+        mock_client.get_categories.return_value = {}
+        mock_create_client.return_value = mock_client
+
+        result = self.runner.invoke(cli, ["categories"])
+
+        assert result.exit_code == 0
+        assert "No categories found" in result.output
+
+    @patch("qbt_client.create_client_from_config")
+    def test_categories_command_error(self, mock_create_client):
+        """Test categories command with error."""
+        mock_client = Mock()
+        mock_client.get_categories.side_effect = QBittorrentError("Connection failed")
+        mock_create_client.return_value = mock_client
+
+        result = self.runner.invoke(cli, ["categories"])
+
+        assert result.exit_code == 0
+        assert "Error getting categories" in result.output
+
     def test_config_file_option(self):
         """Test custom config file option."""
         with patch("qbt_client.create_client_from_config") as mock_create:

@@ -178,13 +178,37 @@ def add(ctx, source, path, category, paused):
     client = ctx.obj["client"]
 
     try:
+        # Validate category if provided
+        if category:
+            try:
+                available_categories = client.get_categories()
+                if category not in available_categories:
+                    console.print(f"[red]Invalid category '{category}'[/red]")
+                    console.print("[yellow]Available categories:[/yellow]")
+                    for cat_name in available_categories.keys():
+                        console.print(f"  - {cat_name}")
+                    console.print(
+                        "\n[dim]Use 'python qbt_client.py categories' to see all categories with details[/dim]"
+                    )
+                    return
+            except QBittorrentError:
+                # If we can't get categories, proceed anyway (qBittorrent will handle it)
+                console.print("[yellow]Warning: Could not validate category[/yellow]")
+
         if source.startswith(("magnet:", "http://", "https://")):
             success = client.add_torrent_url(source, save_path=path or "", category=category or "", paused=paused)
         else:
             success = client.add_torrent_file(source, save_path=path or "", category=category or "", paused=paused)
 
         if success:
-            console.print("[green]Torrent added successfully[/green]")
+            message = "[green]Torrent added successfully[/green]"
+            if category:
+                message += f" to category '[cyan]{category}[/cyan]'"
+            if path:
+                message += f" in path '[blue]{path}[/blue]'"
+            if paused:
+                message += " [yellow](paused)[/yellow]"
+            console.print(message)
         else:
             console.print("[red]Failed to add torrent[/red]")
 
@@ -528,6 +552,37 @@ def status(ctx, refresh):
                 break
     else:
         display_status()
+
+
+@cli.command()
+@click.pass_context
+def categories(ctx):
+    """List available torrent categories"""
+    client = ctx.obj["client"]
+
+    try:
+        categories_data = client.get_categories()
+
+        if not categories_data:
+            console.print("[yellow]No categories found[/yellow]")
+            return
+
+        console.print("[bold green]Available Categories:[/bold green]")
+
+        # Create a table for better formatting
+        table = Table(title="Categories")
+        table.add_column("Name", style="cyan", no_wrap=True)
+        table.add_column("Save Path", style="magenta")
+
+        for name, data in categories_data.items():
+            save_path = data.get("savePath", "")
+            table.add_row(name, save_path or "[dim]Default[/dim]")
+
+        console.print(table)
+        console.print("\n[dim]Usage: python qbt_client.py add <source> --category <name>[/dim]")
+
+    except QBittorrentError as e:
+        console.print(f"[red]Error getting categories: {e}[/red]")
 
 
 @cli.command()
