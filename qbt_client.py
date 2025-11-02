@@ -111,6 +111,12 @@ def cli(ctx, config):
     help="Filter torrents (all, downloading, seeding, completed, paused)",
 )
 @click.option(
+    "--category",
+    "-c",
+    default="",
+    help="Filter by category",
+)
+@click.option(
     "--sort",
     "-s",
     default="name",
@@ -118,12 +124,12 @@ def cli(ctx, config):
 )
 @click.option("--reverse", "-r", is_flag=True, help="Reverse sort order")
 @click.pass_context
-def list_torrents(ctx, filter_type, sort, reverse):
+def list_torrents(ctx, filter_type, category, sort, reverse):
     """List torrents"""
     client = ctx.obj["client"]
 
     try:
-        torrents = client.get_torrents(filter_type=filter_type, sort=sort, reverse=reverse)
+        torrents = client.get_torrents(filter=filter_type, category=category, sort=sort, reverse=reverse)
 
         if not torrents:
             console.print("[yellow]No torrents found[/yellow]")

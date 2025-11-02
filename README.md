@@ -17,7 +17,7 @@ A Python-based command-line tool for remotely managing qBittorrent instances via
 
 🚀 **Active Development** - This project is actively maintained with comprehensive CI/CD pipeline
 
-- ✅ **Tests**: 34/37 passing (92% pass rate) with 72% code coverage
+- ✅ **Tests**: 37/37 passing (100% pass rate) with 74% code coverage
 - ✅ **CI/CD**: Multi-Python testing (3.9-3.12) with automated quality checks
 - ✅ **Security**: Automated vulnerability scanning with Bandit
 - ✅ **Code Quality**: Black formatting, isort imports, mypy type checking
