@@ -241,6 +241,98 @@ def delete(ctx, hashes, delete_files):
         console.print(f"[red]Error deleting torrents: {e}[/red]")
 
 
+@cli.command("delete-by-status")
+@click.argument("status")
+@click.option("--delete-files", is_flag=True, help="Also delete downloaded files")
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Show what would be deleted without actually deleting",
+)
+@click.option(
+    "--yes",
+    "-y",
+    is_flag=True,
+    help="Skip confirmation prompt (useful for automation)",
+)
+@click.pass_context
+def delete_by_status(ctx, status, delete_files, dry_run, yes):
+    """Delete all torrents with specified status (e.g., error, missingFiles)"""
+    client = ctx.obj["client"]
+
+    try:
+        # Get all torrents and filter by status
+        all_torrents = client.get_torrents()
+        matching_torrents = [
+            t for t in all_torrents if t.get("state", "").lower() == status.lower()
+        ]
+
+        if not matching_torrents:
+            console.print(f"[yellow]No torrents found with status '{status}'[/yellow]")
+            return
+
+        console.print(
+            f"[cyan]Found {len(matching_torrents)} torrents with status '{status}':[/cyan]"
+        )
+
+        # Show what will be deleted
+        table = Table(show_header=True, header_style="bold magenta")
+        table.add_column("Name", style="cyan", no_wrap=False, max_width=50)
+        table.add_column("Size", style="green", justify="right")
+        table.add_column("State", style="yellow")
+
+        for torrent in matching_torrents:
+            table.add_row(
+                torrent["name"][:47] + "..."
+                if len(torrent["name"]) > 50
+                else torrent["name"],
+                format_size(torrent["size"]),
+                torrent.get("state", "unknown"),
+            )
+
+        console.print(table)
+
+        if dry_run:
+            console.print(
+                f"\n[yellow]DRY RUN: Would delete {len(matching_torrents)} torrents[/yellow]"
+            )
+            return
+
+        # Confirm deletion
+        action = "delete with files" if delete_files else "remove"
+        if not yes and not click.confirm(
+            f"\nAre you sure you want to {action} these {len(matching_torrents)} torrents?"
+        ):
+            console.print("[yellow]Operation cancelled[/yellow]")
+            return
+
+        # Delete in batches to avoid overwhelming the API
+        batch_size = 50
+        hashes = [t["hash"] for t in matching_torrents]
+        deleted_count = 0
+
+        for i in range(0, len(hashes), batch_size):
+            batch = hashes[i : i + batch_size]
+            success = client.delete_torrents(batch, delete_files=delete_files)
+            if success:
+                deleted_count += len(batch)
+                console.print(
+                    f"[green]Deleted batch {i // batch_size + 1}: {len(batch)} torrents[/green]"
+                )
+            else:
+                console.print(
+                    f"[red]Failed to delete batch {i // batch_size + 1}[/red]"
+                )
+
+        action_past = "deleted with files" if delete_files else "removed"
+        console.print(
+            f"\n[bold green]Successfully {action_past} {deleted_count}/{len(matching_torrents)} torrents[/bold green]"
+        )
+
+    except QBittorrentError as e:
+        console.print(f"[red]Error deleting torrents by status: {e}[/red]")
+
+
 @cli.command()
 @click.pass_context
 def stats(ctx):
@@ -295,6 +387,7 @@ Available commands:
   pause <hash>   - Pause torrent
   resume <hash>  - Resume torrent
   delete <hash>  - Delete torrent
+  delete-by-status <status> - Delete all torrents with specified status
   quit           - Exit interactive mode
                 """
                 )

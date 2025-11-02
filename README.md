@@ -53,6 +53,12 @@ python qbt_client.py resume <hash1> <hash2>
 # Delete torrents
 python qbt_client.py delete <hash1> --delete-files
 
+# Delete all torrents with specific status (with preview)
+python qbt_client.py delete-by-status error --dry-run
+
+# Delete all torrents with specific status
+python qbt_client.py delete-by-status missingFiles --delete-files
+
 # Get statistics
 python qbt_client.py stats
 
