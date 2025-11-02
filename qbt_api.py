@@ -304,6 +304,36 @@ class QBittorrentAPI:
         except requests.RequestException as e:
             raise QBittorrentAPIError(f"Failed to get version: {e}") from e
 
+    def get_preferences(self) -> Dict:
+        """Get qBittorrent preferences/settings."""
+        self._ensure_authenticated()
+
+        try:
+            response = self.session.get(
+                f"{self.base_url}/app/preferences", timeout=self.timeout
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            raise QBittorrentAPIError(f"Failed to get preferences: {e}") from e
+
+    def get_categories(self) -> Dict:
+        """Get all torrent categories."""
+        self._ensure_authenticated()
+
+        try:
+            response = self.session.get(
+                f"{self.base_url}/torrents/categories", timeout=self.timeout
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            raise QBittorrentAPIError(f"Failed to get categories: {e}") from e
+
+    def get_server_state(self) -> Dict:
+        """Get server state information (alias for get_global_transfer_info)."""
+        return self.get_global_transfer_info()
+
 
 def load_config(config_path: str = "config.json") -> Dict:
     """Load configuration from JSON file."""

@@ -363,6 +363,215 @@ def stats(ctx):
 
 
 @cli.command()
+@click.option("--refresh", "-r", type=int, help="Auto-refresh every N seconds")
+@click.pass_context
+def status(ctx, refresh):
+    """Show comprehensive qBittorrent instance status dashboard"""
+    client = ctx.obj["client"]
+
+    def display_status():
+        try:
+            # Get all the data we need
+            torrents = client.get_torrents()
+            transfer_info = client.get_global_transfer_info()
+            version = client.get_application_version()
+            categories = client.get_categories()
+
+            # Clear screen for refresh mode
+            if refresh:
+                console.clear()
+
+            console.print(
+                "[bold blue]═══ qBittorrent Status Dashboard ═══[/bold blue]\n"
+            )
+
+            # Server Information
+            server_table = Table(
+                title="🖥️  Server Information", show_header=False, box=None
+            )
+            server_table.add_column("Field", style="cyan", width=20)
+            server_table.add_column("Value", style="green")
+
+            server_table.add_row("Version", version)
+            server_table.add_row("Connection", f"{client.host}:{client.port}")
+            server_table.add_row(
+                "Protocol", "HTTPS" if client.base_url.startswith("https") else "HTTP"
+            )
+
+            console.print(server_table)
+            console.print()
+
+            # Transfer Statistics
+            transfer_table = Table(
+                title="📊 Transfer Statistics", show_header=False, box=None
+            )
+            transfer_table.add_column("Metric", style="cyan", width=20)
+            transfer_table.add_column("Value", style="green")
+
+            transfer_table.add_row(
+                "Download Speed", format_speed(transfer_info["dl_info_speed"])
+            )
+            transfer_table.add_row(
+                "Upload Speed", format_speed(transfer_info["up_info_speed"])
+            )
+            transfer_table.add_row(
+                "Session Downloaded", format_size(transfer_info["dl_info_data"])
+            )
+            transfer_table.add_row(
+                "Session Uploaded", format_size(transfer_info["up_info_data"])
+            )
+            transfer_table.add_row(
+                "All-time Downloaded", format_size(transfer_info.get("alltime_dl", 0))
+            )
+            transfer_table.add_row(
+                "All-time Uploaded", format_size(transfer_info.get("alltime_ul", 0))
+            )
+
+            if transfer_info.get("global_ratio"):
+                transfer_table.add_row(
+                    "Global Ratio", f"{transfer_info['global_ratio']:.2f}"
+                )
+
+            console.print(transfer_table)
+            console.print()
+
+            # Torrent Overview
+            status_counts = {}
+            total_size = 0
+            active_downloads = 0
+            active_uploads = 0
+
+            for torrent in torrents:
+                state = torrent.get("state", "unknown")
+                status_counts[state] = status_counts.get(state, 0) + 1
+                total_size += torrent.get("size", 0)
+
+                if torrent.get("dlspeed", 0) > 0:
+                    active_downloads += 1
+                if torrent.get("upspeed", 0) > 0:
+                    active_uploads += 1
+
+            overview_table = Table(
+                title="📚 Torrent Overview", show_header=False, box=None
+            )
+            overview_table.add_column("Metric", style="cyan", width=20)
+            overview_table.add_column("Value", style="green")
+
+            overview_table.add_row("Total Torrents", str(len(torrents)))
+            overview_table.add_row("Total Size", format_size(total_size))
+            overview_table.add_row("Active Downloads", str(active_downloads))
+            overview_table.add_row("Active Uploads", str(active_uploads))
+            overview_table.add_row("Categories", str(len(categories)))
+
+            console.print(overview_table)
+            console.print()
+
+            # Status Breakdown
+            if status_counts:
+                status_table = Table(title="📈 Status Breakdown", show_header=True)
+                status_table.add_column("Status", style="cyan")
+                status_table.add_column("Count", style="green", justify="right")
+                status_table.add_column("Percentage", style="yellow", justify="right")
+
+                total_torrents = len(torrents)
+                for state, count in sorted(status_counts.items()):
+                    percentage = (
+                        (count / total_torrents) * 100 if total_torrents > 0 else 0
+                    )
+
+                    # Color code the status
+                    if state in ["downloading", "uploading"]:
+                        status_style = "bold green"
+                    elif state in ["error", "missingFiles"]:
+                        status_style = "bold red"
+                    elif state in ["pausedDL", "pausedUP"]:
+                        status_style = "yellow"
+                    else:
+                        status_style = "white"
+
+                    status_table.add_row(
+                        Text(state, style=status_style),
+                        str(count),
+                        f"{percentage:.1f}%",
+                    )
+
+                console.print(status_table)
+                console.print()
+
+            # Recent Activity (Top 5 most active torrents)
+            active_torrents = [
+                t
+                for t in torrents
+                if t.get("dlspeed", 0) > 0 or t.get("upspeed", 0) > 0
+            ]
+
+            if active_torrents:
+                # Sort by combined speed
+                active_torrents.sort(
+                    key=lambda x: x.get("dlspeed", 0) + x.get("upspeed", 0),
+                    reverse=True,
+                )
+
+                activity_table = Table(
+                    title="🚀 Most Active Torrents", show_header=True
+                )
+                activity_table.add_column("Name", style="cyan", max_width=40)
+                activity_table.add_column("Progress", style="green", justify="right")
+                activity_table.add_column("Down Speed", style="blue", justify="right")
+                activity_table.add_column("Up Speed", style="magenta", justify="right")
+                activity_table.add_column("ETA", style="yellow", justify="right")
+
+                for torrent in active_torrents[:5]:  # Top 5
+                    name = torrent["name"]
+                    if len(name) > 37:
+                        name = name[:34] + "..."
+
+                    progress = torrent.get("progress", 0) * 100
+                    dl_speed = format_speed(torrent.get("dlspeed", 0))
+                    up_speed = format_speed(torrent.get("upspeed", 0))
+                    eta = format_eta(torrent.get("eta", 0))
+
+                    activity_table.add_row(
+                        name,
+                        f"{progress:.1f}%",
+                        dl_speed if torrent.get("dlspeed", 0) > 0 else "-",
+                        up_speed if torrent.get("upspeed", 0) > 0 else "-",
+                        eta,
+                    )
+
+                console.print(activity_table)
+
+            if refresh:
+                console.print(
+                    f"\n[dim]Refreshing every {refresh} seconds. Press Ctrl+C to stop.[/dim]"
+                )
+
+        except QBittorrentError as e:
+            console.print(f"[red]Error getting status: {e}[/red]")
+            return False
+        except KeyboardInterrupt:
+            console.print("\n[yellow]Status monitoring stopped.[/yellow]")
+            return False
+
+        return True
+
+    # Display once or continuously based on refresh parameter
+    if refresh:
+        import time
+
+        while True:
+            if not display_status():
+                break
+            try:
+                time.sleep(refresh)
+            except KeyboardInterrupt:
+                console.print("\n[yellow]Status monitoring stopped.[/yellow]")
+                break
+    else:
+        display_status()
+
+
+@cli.command()
 @click.pass_context
 def interactive(ctx):
     """Interactive mode"""
@@ -383,6 +592,7 @@ def interactive(ctx):
 Available commands:
   list           - List all torrents
   stats          - Show transfer statistics
+  status         - Show comprehensive status dashboard
   add <url>      - Add torrent from magnet/URL
   pause <hash>   - Pause torrent
   resume <hash>  - Resume torrent
@@ -395,6 +605,8 @@ Available commands:
                 ctx.invoke(list)
             elif command.lower() == "stats":
                 ctx.invoke(stats)
+            elif command.lower() == "status":
+                ctx.invoke(status, refresh=None)
             elif command.startswith("add "):
                 url = command[4:].strip()
                 ctx.invoke(add, source=url)
