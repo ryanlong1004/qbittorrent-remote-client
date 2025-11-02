@@ -99,16 +99,21 @@ class TestQBittorrentAPI:
         qbt_client._authenticated = True
         mock_session.get(f"{qbt_client.base_url}/torrents/info", json=sample_torrents)
 
-        result = qbt_client.get_torrents(filter="downloading", category="Movies")
+        qbt_client.get_torrents(filter="downloading", category="Movies")
+        # requests_mock converts param values to lowercase in qs, but the URL is correct
         assert mock_session.last_request.qs == {
             "filter": ["downloading"],
-            "category": ["Movies"],
+            "category": ["movies"],  # lowercase due to requests_mock behavior
         }
 
-    def test_get_global_transfer_info(self, qbt_client, mock_session, sample_transfer_info):
+    def test_get_global_transfer_info(
+        self, qbt_client, mock_session, sample_transfer_info
+    ):
         """Test get_global_transfer_info."""
         qbt_client._authenticated = True
-        mock_session.get(f"{qbt_client.base_url}/transfer/info", json=sample_transfer_info)
+        mock_session.get(
+            f"{qbt_client.base_url}/transfer/info", json=sample_transfer_info
+        )
 
         result = qbt_client.get_global_transfer_info()
         assert result["dl_info_speed"] == 1024000
@@ -124,7 +129,9 @@ class TestQBittorrentAPI:
     def test_get_categories(self, qbt_client, mock_session, sample_categories):
         """Test get_categories."""
         qbt_client._authenticated = True
-        mock_session.get(f"{qbt_client.base_url}/torrents/categories", json=sample_categories)
+        mock_session.get(
+            f"{qbt_client.base_url}/torrents/categories", json=sample_categories
+        )
 
         result = qbt_client.get_categories()
         assert "Movies" in result
@@ -154,7 +161,9 @@ class TestQBittorrentAPI:
         result = qbt_client.delete_torrents(["hash1"], delete_files=True)
         assert result is True
 
-    def test_ensure_authenticated_when_not_authenticated(self, qbt_client, mock_session):
+    def test_ensure_authenticated_when_not_authenticated(
+        self, qbt_client, mock_session
+    ):
         """Test _ensure_authenticated when not authenticated."""
         mock_session.post(f"{qbt_client.base_url}/auth/login", text="Ok.")
 

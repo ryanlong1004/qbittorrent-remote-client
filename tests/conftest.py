@@ -48,6 +48,7 @@ def sample_torrents():
             "progress": 0.5,
             "eta": 1800,  # 30 minutes
             "category": "Movies",
+            "ratio": 1.5,
         },
         {
             "hash": "def456",
@@ -59,6 +60,7 @@ def sample_torrents():
             "progress": 0.8,
             "eta": 8640000,  # infinity
             "category": "TV",
+            "ratio": 0.8,
         },
         {
             "hash": "ghi789",
@@ -70,6 +72,7 @@ def sample_torrents():
             "progress": 0.0,
             "eta": 8640000,
             "category": "",
+            "ratio": 0.0,
         },
     ]
 
