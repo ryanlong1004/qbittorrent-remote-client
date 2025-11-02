@@ -1,0 +1,38 @@
+# Codecov configuration file
+# https://docs.codecov.com/docs/codecov-yaml
+
+coverage:
+  status:
+    project:
+      default:
+        # Target coverage percentage
+        target: 75%
+        # Allow coverage to drop by this amount and still pass
+        threshold: 2%
+        # Only post a status if coverage changes by this amount
+        if_ci_failed: error
+    patch:
+      default:
+        # Ensure new code has decent coverage
+        target: 70%
+        threshold: 5%
+
+comment:
+  layout: "header, diff, flags, files, footer"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+
+ignore:
+  - "tests/"
+  - "examples.py"
+  - "test_connection.py"
+  - "setup.sh"
+  - "cleanup_missing_files.sh"
+
+flags:
+  unittests:
+    paths:
+      - qbt_api.py
+      - qbt_client.py
