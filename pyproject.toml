@@ -33,7 +33,7 @@ Repository = "https://github.com/ryanlong1004/qbittorrent-remote-client"
 Issues = "https://github.com/ryanlong1004/qbittorrent-remote-client/issues"
 
 [project.scripts]
-qbt-client = "qbt_client:main"
+qbt-client = "qbittorrent_remote_client:main"
 
 [project.optional-dependencies]
 dev = [
@@ -51,8 +51,9 @@ dev = [
     "tox>=3.24",
 ]
 
-[tool.setuptools]
-py-modules = ["qbt_api", "qbt_client"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["qbittorrent_remote_client*"]
 
 [tool.black]
 line-length = 120

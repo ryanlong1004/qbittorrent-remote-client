@@ -1,0 +1,11 @@
+include README.md
+include LICENSE
+include requirements.txt
+include config.example.json
+recursive-include qbittorrent_remote_client *.py
+global-exclude *.pyc
+global-exclude __pycache__
+global-exclude *.pyo
+global-exclude .pytest_cache
+global-exclude .coverage
+global-exclude htmlcov

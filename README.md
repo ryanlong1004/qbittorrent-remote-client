@@ -57,7 +57,43 @@ The dashboard shows:
 - 📈 Status breakdown with color-coded percentages
 - 🚀 Most active torrents with progress and speeds
 
+## Installation
+
+### From PyPI (Recommended)
+
+```bash
+pip install qbittorrent-remote-client
+```
+
+After installation, you can use the `qbt-client` command directly from anywhere:
+
+```bash
+qbt-client --help
+```
+
+### From Source
+
+### From Source
+
+1. Clone and install from source:
+
+   ```bash
+   git clone https://github.com/ryanlong1004/qbittorrent-remote-client.git
+   cd qbittorrent-remote-client
+   pip install .
+   ```
+
+2. For development:
+
+   ```bash
+   git clone https://github.com/ryanlong1004/qbittorrent-remote-client.git
+   cd qbittorrent-remote-client
+   pip install -e .
+   ```
+
 ## Setup
+
+After installation, you need to configure the connection to your qBittorrent instance:
 
 1. Enable Web UI in qBittorrent:
 
@@ -66,16 +102,25 @@ The dashboard shows:
    - Set username/password
    - Note the port (default: 8080)
 
-2. Install dependencies:
+2. Create configuration file:
 
    ```bash
-   pip install -r requirements.txt
-   ```
-
-3. Configure connection:
-   ```bash
+   # Download example config
+   curl -O https://raw.githubusercontent.com/ryanlong1004/qbittorrent-remote-client/main/config.example.json
    cp config.example.json config.json
    # Edit config.json with your qBittorrent details
+   ```
+
+   Or create `config.json` manually with your qBittorrent details:
+
+   ```json
+   {
+     "host": "localhost",
+     "port": 8080,
+     "username": "admin",
+     "password": "your_password",
+     "use_https": false
+   }
    ```
 
 ## Development Setup
@@ -125,52 +170,57 @@ pytest -k "test_status"
 
 ```bash
 # List all torrents
-python qbt_client.py list
+qbt-client list
 
 # List available categories
-python qbt_client.py categories
+qbt-client categories
 
 # Add torrent from magnet link
-python qbt_client.py add "magnet:?xt=urn:btih:..."
+qbt-client add "magnet:?xt=urn:btih:..."
 
 # Add torrent to specific category
-python qbt_client.py add "magnet:?xt=urn:btih:..." --category Films
+qbt-client add "magnet:?xt=urn:btih:..." --category Films
 
 # Add torrent from file with category and custom path
-python qbt_client.py add /path/to/file.torrent --category Music --path /custom/path
+qbt-client add /path/to/file.torrent --category Music --path /custom/path
 
 # Pause torrents
-python qbt_client.py pause <hash1> <hash2>
+qbt-client pause <hash1> <hash2>
 
 # Resume torrents
-python qbt_client.py resume <hash1> <hash2>
+qbt-client resume <hash1> <hash2>
 
 # Delete torrents
-python qbt_client.py delete <hash1> --delete-files
+qbt-client delete <hash1> --delete-files
 
 # Delete all torrents with specific status (with preview)
-python qbt_client.py delete-by-status error --dry-run
+qbt-client delete-by-status error --dry-run
 
 # Delete all torrents with specific status
-python qbt_client.py delete-by-status missingFiles --delete-files
+qbt-client delete-by-status missingFiles --delete-files
 
 # Get statistics
-python qbt_client.py stats
+qbt-client stats
+
+# Show comprehensive status dashboard
+qbt-client status
+
+# Auto-refresh status every 5 seconds
+qbt-client status --refresh 5
 
 # Interactive mode
-python qbt_client.py interactive
+qbt-client interactive
 ```
 
-## Configuration
+### Alternative: Using Python Module
 
-Edit `config.json` to match your qBittorrent setup:
+If you prefer to run as a Python module:
 
-```json
-{
-  "host": "localhost",
-  "port": 8080,
-  "username": "admin",
-  "password": "your_password",
-  "use_https": false
-}
+```bash
+# List all torrents
+python -m qbittorrent_remote_client.qbt_client list
+
+# Or if using from source directory
+# Or if using from source directory
+python qbt_client.py list
 ```

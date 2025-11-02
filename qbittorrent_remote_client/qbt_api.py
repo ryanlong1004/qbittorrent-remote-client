@@ -1,0 +1,334 @@
+"""
+qBittorrent Remote API Client
+
+A Python wrapper for the qBittorrent Web API that provides methods to interact
+with a remote qBittorrent instance via HTTP requests.
+"""
+
+import json
+import os
+from typing import Dict, List, Union
+
+import requests
+
+
+class QBittorrentError(Exception):
+    """Base exception for qBittorrent API errors."""
+
+
+class QBittorrentAuthenticationError(QBittorrentError):
+    """Raised when authentication fails."""
+
+
+class QBittorrentConnectionError(QBittorrentError):
+    """Raised when connection to qBittorrent fails."""
+
+
+class QBittorrentAPIError(QBittorrentError):
+    """Raised when an API call fails."""
+
+
+class QBittorrentAPI:
+    """
+    A Python wrapper for the qBittorrent Web API.
+
+    Provides methods to interact with a remote qBittorrent instance
+    via HTTP requests to the Web API endpoints.
+    """
+
+    def __init__(
+        self,
+        host: str = "localhost",
+        port: int = 8080,
+        username: str = "admin",
+        password: str = "",
+        use_https: bool = False,
+        timeout: int = 30,
+        verify_ssl: bool = True,
+        base_path: str = "",
+    ):
+        """
+        Initialize the qBittorrent API client.
+
+        Args:
+            host: qBittorrent host address
+            port: qBittorrent Web UI port
+            username: Web UI username
+            password: Web UI password
+            use_https: Whether to use HTTPS
+            timeout: Request timeout in seconds
+            verify_ssl: Whether to verify SSL certificates
+            base_path: Base path for the qBittorrent Web UI (e.g., "/qbittorrent")
+        """
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
+        self.timeout = timeout
+
+        protocol = "https" if use_https else "http"
+        # Ensure base_path starts with / if provided and doesn't end with /
+        if base_path and not base_path.startswith("/"):
+            base_path = "/" + base_path
+        if base_path.endswith("/"):
+            base_path = base_path.rstrip("/")
+
+        self.base_url = f"{protocol}://{host}:{port}{base_path}/api/v2"
+
+        self.session = requests.Session()
+        self.session.verify = verify_ssl
+
+        self._authenticated = False
+
+    def login(self) -> bool:
+        """
+        Authenticate with the qBittorrent Web API.
+
+        Returns:
+            True if authentication successful
+
+        Raises:
+            QBittorrentAuthenticationError: If login fails due to bad credentials
+            QBittorrentConnectionError: If connection to server fails
+        """
+        try:
+            response = self.session.post(
+                f"{self.base_url}/auth/login",
+                data={"username": self.username, "password": self.password},
+                timeout=self.timeout,
+            )
+
+            if response.text == "Ok.":
+                self._authenticated = True
+                return True
+
+            self._authenticated = False
+            raise QBittorrentAuthenticationError("Invalid username or password")
+
+        except requests.ConnectionError as e:
+            self._authenticated = False
+            raise QBittorrentConnectionError(f"Connection failed: {e}")
+        except requests.RequestException as e:
+            self._authenticated = False
+            raise QBittorrentConnectionError(f"Request failed: {e}")
+
+    def logout(self) -> bool:
+        """Logout from the qBittorrent Web API."""
+        try:
+            response = self.session.post(f"{self.base_url}/auth/logout", timeout=self.timeout)
+            self._authenticated = False
+            return response.status_code == 200
+        except requests.RequestException:
+            return False
+
+    def _ensure_authenticated(self):
+        """Ensure we're authenticated before making API calls."""
+        if not self._authenticated:
+            if not self.login():
+                raise QBittorrentAuthenticationError("Authentication failed. Please check your credentials.")
+
+    def get_torrents(
+        self,
+        filter: str = "all",
+        category: str = "",
+        sort: str = "name",
+        reverse: bool = False,
+    ) -> List[Dict]:
+        """
+        Get list of torrents.
+
+        Args:
+            filter: Filter type (all, downloading, seeding, completed, paused, etc.)
+            category: Filter by category
+            sort: Sort field
+            reverse: Reverse sort order
+
+        Returns:
+            List of torrent dictionaries
+        """
+        self._ensure_authenticated()
+
+        params = {}
+
+        # Only add non-default parameters
+        if filter != "all":
+            params["filter"] = filter
+        if category:
+            params["category"] = category
+        if sort != "name":
+            params["sort"] = sort
+        if reverse:
+            params["reverse"] = reverse
+
+        try:
+            response = self.session.get(f"{self.base_url}/torrents/info", params=params, timeout=self.timeout)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            raise QBittorrentAPIError(f"Failed to get torrents: {e}") from e
+
+    def add_torrent_url(self, url: str, save_path: str = "", category: str = "", paused: bool = False) -> bool:
+        """
+        Add torrent from URL (magnet link or HTTP).
+
+        Args:
+            url: Magnet link or torrent file URL
+            save_path: Download path
+            category: Torrent category
+            paused: Add in paused state
+
+        Returns:
+            True if successful
+        """
+        self._ensure_authenticated()
+
+        data = {
+            "urls": url,
+            "savepath": save_path,
+            "category": category,
+            "paused": paused,
+        }
+
+        try:
+            response = self.session.post(f"{self.base_url}/torrents/add", data=data, timeout=self.timeout)
+            return response.text == "Ok."
+        except requests.RequestException as e:
+            raise QBittorrentAPIError(f"Failed to add torrent: {e}") from e
+
+    def add_torrent_file(
+        self,
+        file_path: str,
+        save_path: str = "",
+        category: str = "",
+        paused: bool = False,
+    ) -> bool:
+        """
+        Add torrent from file.
+
+        Args:
+            file_path: Path to torrent file
+            save_path: Download path
+            category: Torrent category
+            paused: Add in paused state
+
+        Returns:
+            True if successful
+        """
+        self._ensure_authenticated()
+
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"Torrent file not found: {file_path}")
+
+        data = {"savepath": save_path, "category": category, "paused": paused}
+
+        try:
+            with open(file_path, "rb") as f:
+                files = {"torrents": f}
+                response = self.session.post(
+                    f"{self.base_url}/torrents/add",
+                    data=data,
+                    files=files,
+                    timeout=self.timeout,
+                )
+            return response.text == "Ok."
+        except requests.RequestException as e:
+            raise QBittorrentAPIError(f"Failed to add torrent file: {e}") from e
+
+    def pause_torrents(self, hashes: Union[str, List[str]]) -> bool:
+        """Pause torrents by hash."""
+        return self._torrent_action("pause", hashes)
+
+    def resume_torrents(self, hashes: Union[str, List[str]]) -> bool:
+        """Resume torrents by hash."""
+        return self._torrent_action("resume", hashes)
+
+    def delete_torrents(self, hashes: Union[str, List[str]], delete_files: bool = False) -> bool:
+        """Delete torrents by hash."""
+        self._ensure_authenticated()
+
+        if isinstance(hashes, str):
+            hashes = [hashes]
+
+        data = {"hashes": "|".join(hashes), "deleteFiles": delete_files}
+
+        try:
+            response = self.session.post(f"{self.base_url}/torrents/delete", data=data, timeout=self.timeout)
+            return response.status_code == 200
+        except requests.RequestException as e:
+            raise QBittorrentAPIError(f"Failed to delete torrents: {e}") from e
+
+    def _torrent_action(self, action: str, hashes: Union[str, List[str]]) -> bool:
+        """Perform action on torrents."""
+        self._ensure_authenticated()
+
+        if isinstance(hashes, str):
+            hashes = [hashes]
+
+        data = {"hashes": "|".join(hashes)}
+
+        try:
+            response = self.session.post(f"{self.base_url}/torrents/{action}", data=data, timeout=self.timeout)
+            return response.status_code == 200
+        except requests.RequestException as e:
+            raise QBittorrentAPIError(f"Failed to {action} torrents: {e}") from e
+
+    def get_global_transfer_info(self) -> Dict:
+        """Get global transfer information."""
+        self._ensure_authenticated()
+
+        try:
+            response = self.session.get(f"{self.base_url}/transfer/info", timeout=self.timeout)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            raise QBittorrentAPIError(f"Failed to get transfer info: {e}") from e
+
+    def get_application_version(self) -> str:
+        """Get qBittorrent application version."""
+        try:
+            response = self.session.get(f"{self.base_url}/app/version", timeout=self.timeout)
+            response.raise_for_status()
+            return response.text.strip('"')
+        except requests.RequestException as e:
+            raise QBittorrentAPIError(f"Failed to get version: {e}") from e
+
+    def get_preferences(self) -> Dict:
+        """Get qBittorrent preferences/settings."""
+        self._ensure_authenticated()
+
+        try:
+            response = self.session.get(f"{self.base_url}/app/preferences", timeout=self.timeout)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            raise QBittorrentAPIError(f"Failed to get preferences: {e}") from e
+
+    def get_categories(self) -> Dict:
+        """Get all torrent categories."""
+        self._ensure_authenticated()
+
+        try:
+            response = self.session.get(f"{self.base_url}/torrents/categories", timeout=self.timeout)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            raise QBittorrentAPIError(f"Failed to get categories: {e}") from e
+
+    def get_server_state(self) -> Dict:
+        """Get server state information (alias for get_global_transfer_info)."""
+        return self.get_global_transfer_info()
+
+
+def load_config(config_path: str = "config.json") -> Dict:
+    """Load configuration from JSON file."""
+    if not os.path.exists(config_path):
+        raise FileNotFoundError(f"Config file not found: {config_path}")
+
+    with open(config_path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def create_client_from_config(config_path: str = "config.json") -> QBittorrentAPI:
+    """Create QBittorrentAPI client from config file."""
+    config = load_config(config_path)
+    return QBittorrentAPI(**config)
