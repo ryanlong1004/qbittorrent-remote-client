@@ -17,7 +17,7 @@ A Python-based command-line tool for remotely managing qBittorrent instances via
 
 🚀 **Active Development** - This project is actively maintained with comprehensive CI/CD pipeline
 
-- ✅ **Tests**: 37/37 passing (100% pass rate) with 74% code coverage
+- ✅ **Tests**: 43/43 passing (100% pass rate) with 75% code coverage
 - ✅ **CI/CD**: Multi-Python testing (3.9-3.12) with automated quality checks
 - ✅ **Security**: Automated vulnerability scanning with Bandit
 - ✅ **Code Quality**: Black formatting, isort imports, mypy type checking
@@ -28,7 +28,8 @@ A Python-based command-line tool for remotely managing qBittorrent instances via
 
 - 🖥️ **Comprehensive Status Dashboard** - Real-time monitoring with rich formatted display
 - 📋 **List and Filter Torrents** - View torrents with detailed information and filtering
-- ➕ **Add Torrents** - From magnet links, URLs, or torrent files
+- ➕ **Add Torrents** - From magnet links, URLs, or torrent files with category support
+- 🏷️ **Category Management** - List categories and organize torrents automatically
 - ⏸️ **Control Torrents** - Pause, resume, and delete operations
 - 🗑️ **Bulk Operations** - Delete torrents by status (error, missingFiles, etc.)
 - 📊 **Transfer Statistics** - Global transfer info and session statistics
@@ -126,11 +127,17 @@ pytest -k "test_status"
 # List all torrents
 python qbt_client.py list
 
+# List available categories
+python qbt_client.py categories
+
 # Add torrent from magnet link
 python qbt_client.py add "magnet:?xt=urn:btih:..."
 
-# Add torrent from file
-python qbt_client.py add /path/to/file.torrent
+# Add torrent to specific category
+python qbt_client.py add "magnet:?xt=urn:btih:..." --category Films
+
+# Add torrent from file with category and custom path
+python qbt_client.py add /path/to/file.torrent --category Music --path /custom/path
 
 # Pause torrents
 python qbt_client.py pause <hash1> <hash2>
