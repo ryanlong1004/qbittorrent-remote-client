@@ -18,14 +18,14 @@ test: ## Run tests
 	pytest -v
 
 test-cov: ## Run tests with coverage
-	pytest -v --cov=qbt_api --cov=qbt_client --cov-report=term-missing --cov-report=html
+	pytest -v --cov=qbt_api --cov=qbt_client --cov=qbittorrent_remote_client --cov-report=term-missing --cov-report=html
 
 test-integration: ## Run integration tests
 	pytest -v -m integration
 
 lint: ## Run all linters
 	flake8 .
-	pylint qbt_api.py qbt_client.py
+	pylint qbt_api.py qbt_client.py qbittorrent_remote_client/
 	bandit -r . -ll
 
 format: ## Format code
@@ -37,7 +37,7 @@ format-check: ## Check code formatting
 	isort --check-only --diff .
 
 type-check: ## Run type checking
-	mypy qbt_api.py qbt_client.py --ignore-missing-imports
+	mypy qbt_api.py qbt_client.py qbittorrent_remote_client/ --ignore-missing-imports
 
 security: ## Run security checks
 	bandit -r . -f json -o bandit-report.json

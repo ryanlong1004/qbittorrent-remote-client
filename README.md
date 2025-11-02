@@ -144,6 +144,26 @@ make test-cov
 make ci
 ```
 
+### Developer Workflow
+
+To avoid CI/CD formatting failures, always run these commands before committing:
+
+```bash
+# Format code automatically
+make format
+
+# Check formatting (what CI/CD runs)
+make format-check
+
+# Run all quality checks locally (same as CI/CD)
+make ci
+
+# Or run pre-commit hooks manually
+make pre-commit
+```
+
+**Pro Tip**: Pre-commit hooks are installed automatically and will format code before each commit!
+
 ## Testing
 
 This project includes a comprehensive test suite with:
