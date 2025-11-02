@@ -1,6 +1,68 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qbittorrent-remote-client"
+version = "0.1.0"
+authors = [
+    {name = "rlong", email = "rlong@example.com"},
+]
+description = "A Python-based command-line tool for remotely managing qBittorrent instances via the Web API"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Communications :: File Sharing",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Utilities",
+]
+keywords = ["qbittorrent", "torrent", "remote", "cli", "automation"]
+dependencies = [
+    "click>=8.0.0",
+    "requests>=2.25.0",
+    "rich>=10.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ryanlong1004/qbittorrent-remote-client"
+Repository = "https://github.com/ryanlong1004/qbittorrent-remote-client"
+Issues = "https://github.com/ryanlong1004/qbittorrent-remote-client/issues"
+
+[project.scripts]
+qbt-client = "qbt_client:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov>=2.10",
+    "pytest-mock>=3.6",
+    "requests-mock>=1.9",
+    "black>=22.0",
+    "flake8>=4.0",
+    "pylint>=2.12",
+    "isort>=5.10",
+    "mypy>=0.950",
+    "bandit>=1.7",
+    "pre-commit>=2.15",
+    "tox>=3.24",
+]
+
+[tool.setuptools]
+py-modules = ["qbt_api", "qbt_client"]
+
 [tool.black]
 line-length = 120
-target-version = ['py38']
+target-version = ['py39']
 
 [tool.isort]
 profile = "black"
@@ -34,6 +96,13 @@ markers = [
     "integration: marks tests as integration tests",
 ]
 
-[build-system]
-requires = ["setuptools>=45", "wheel"]
-build-backend = "setuptools.build_meta"
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+skips = ["B101"]
