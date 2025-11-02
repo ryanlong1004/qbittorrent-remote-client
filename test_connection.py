@@ -4,8 +4,9 @@
 Test script for qBittorrent Remote Client
 """
 
-import sys
 import os
+import sys
+
 from qbt_api import QBittorrentAPI
 
 

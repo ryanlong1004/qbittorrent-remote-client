@@ -1,18 +1,19 @@
 """Tests for qbt_api.py"""
 
 import json
+from unittest.mock import mock_open, patch
+
 import pytest
 import requests
-from unittest.mock import patch, mock_open
 
 from qbt_api import (
     QBittorrentAPI,
-    QBittorrentError,
+    QBittorrentAPIError,
     QBittorrentAuthenticationError,
     QBittorrentConnectionError,
-    QBittorrentAPIError,
-    load_config,
+    QBittorrentError,
     create_client_from_config,
+    load_config,
 )
 
 

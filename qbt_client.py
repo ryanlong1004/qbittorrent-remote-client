@@ -13,8 +13,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 
-from qbt_api import create_client_from_config, QBittorrentError
-
+from qbt_api import QBittorrentError, create_client_from_config
 
 console = Console()
 

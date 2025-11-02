@@ -1,11 +1,12 @@
 """Tests for qbt_client.py"""
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 from click.testing import CliRunner
 
-from qbt_client import cli, format_size, format_speed, format_eta
 from qbt_api import QBittorrentError
+from qbt_client import cli, format_eta, format_size, format_speed
 
 
 class TestUtilityFunctions:
