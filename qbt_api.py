@@ -85,9 +85,7 @@ class QBittorrentAPI:
     def logout(self) -> bool:
         """Logout from the qBittorrent Web API."""
         try:
-            response = self.session.post(
-                f"{self.base_url}/auth/logout", timeout=self.timeout
-            )
+            response = self.session.post(f"{self.base_url}/auth/logout", timeout=self.timeout)
             self._authenticated = False
             return response.status_code == 200
         except requests.RequestException:
@@ -128,17 +126,13 @@ class QBittorrentAPI:
         }
 
         try:
-            response = self.session.get(
-                f"{self.base_url}/torrents/info", params=params, timeout=self.timeout
-            )
+            response = self.session.get(f"{self.base_url}/torrents/info", params=params, timeout=self.timeout)
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:
             raise Exception(f"Failed to get torrents: {e}")
 
-    def add_torrent_url(
-        self, url: str, save_path: str = "", category: str = "", paused: bool = False
-    ) -> bool:
+    def add_torrent_url(self, url: str, save_path: str = "", category: str = "", paused: bool = False) -> bool:
         """
         Add torrent from URL (magnet link or HTTP).
 
@@ -161,9 +155,7 @@ class QBittorrentAPI:
         }
 
         try:
-            response = self.session.post(
-                f"{self.base_url}/torrents/add", data=data, timeout=self.timeout
-            )
+            response = self.session.post(f"{self.base_url}/torrents/add", data=data, timeout=self.timeout)
             return response.text == "Ok."
         except requests.RequestException as e:
             raise Exception(f"Failed to add torrent: {e}")
@@ -215,9 +207,7 @@ class QBittorrentAPI:
         """Resume torrents by hash."""
         return self._torrent_action("resume", hashes)
 
-    def delete_torrents(
-        self, hashes: Union[str, List[str]], delete_files: bool = False
-    ) -> bool:
+    def delete_torrents(self, hashes: Union[str, List[str]], delete_files: bool = False) -> bool:
         """Delete torrents by hash."""
         self._ensure_authenticated()
 
@@ -227,9 +217,7 @@ class QBittorrentAPI:
         data = {"hashes": "|".join(hashes), "deleteFiles": delete_files}
 
         try:
-            response = self.session.post(
-                f"{self.base_url}/torrents/delete", data=data, timeout=self.timeout
-            )
+            response = self.session.post(f"{self.base_url}/torrents/delete", data=data, timeout=self.timeout)
             return response.status_code == 200
         except requests.RequestException as e:
             raise Exception(f"Failed to delete torrents: {e}")
@@ -244,9 +232,7 @@ class QBittorrentAPI:
         data = {"hashes": "|".join(hashes)}
 
         try:
-            response = self.session.post(
-                f"{self.base_url}/torrents/{action}", data=data, timeout=self.timeout
-            )
+            response = self.session.post(f"{self.base_url}/torrents/{action}", data=data, timeout=self.timeout)
             return response.status_code == 200
         except requests.RequestException as e:
             raise Exception(f"Failed to {action} torrents: {e}")
@@ -256,9 +242,7 @@ class QBittorrentAPI:
         self._ensure_authenticated()
 
         try:
-            response = self.session.get(
-                f"{self.base_url}/transfer/info", timeout=self.timeout
-            )
+            response = self.session.get(f"{self.base_url}/transfer/info", timeout=self.timeout)
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:
@@ -267,9 +251,7 @@ class QBittorrentAPI:
     def get_application_version(self) -> str:
         """Get qBittorrent application version."""
         try:
-            response = self.session.get(
-                f"{self.base_url}/app/version", timeout=self.timeout
-            )
+            response = self.session.get(f"{self.base_url}/app/version", timeout=self.timeout)
             response.raise_for_status()
             return response.text.strip('"')
         except requests.RequestException as e:

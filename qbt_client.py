@@ -72,9 +72,7 @@ def get_state_color(state):
 
 
 @click.group()
-@click.option(
-    "--config", "-c", default="config.json", help="Path to configuration file"
-)
+@click.option("--config", "-c", default="config.json", help="Path to configuration file")
 @click.pass_context
 def cli(ctx, config):
     """qBittorrent Remote Client"""
@@ -111,9 +109,7 @@ def list_torrents(ctx, filter_type, sort, reverse):
     client = ctx.obj["client"]
 
     try:
-        torrents = client.get_torrents(
-            filter_type=filter_type, sort=sort, reverse=reverse
-        )
+        torrents = client.get_torrents(filter_type=filter_type, sort=sort, reverse=reverse)
 
         if not torrents:
             console.print("[yellow]No torrents found[/yellow]")
@@ -163,13 +159,9 @@ def add(ctx, source, path, category, paused):
 
     try:
         if source.startswith(("magnet:", "http://", "https://")):
-            success = client.add_torrent_url(
-                source, save_path=path or "", category=category or "", paused=paused
-            )
+            success = client.add_torrent_url(source, save_path=path or "", category=category or "", paused=paused)
         else:
-            success = client.add_torrent_file(
-                source, save_path=path or "", category=category or "", paused=paused
-            )
+            success = client.add_torrent_file(source, save_path=path or "", category=category or "", paused=paused)
 
         if success:
             console.print("[green]Torrent added successfully[/green]")
@@ -279,16 +271,18 @@ def interactive(ctx):
             if command.lower() in ["quit", "exit", "q"]:
                 break
             elif command.lower() == "help":
-                console.print("""
+                console.print(
+                    """
 Available commands:
   list           - List all torrents
-  stats          - Show transfer statistics  
+  stats          - Show transfer statistics
   add <url>      - Add torrent from magnet/URL
   pause <hash>   - Pause torrent
   resume <hash>  - Resume torrent
   delete <hash>  - Delete torrent
   quit           - Exit interactive mode
-                """)
+                """
+                )
             elif command.lower() == "list":
                 ctx.invoke(list)
             elif command.lower() == "stats":
