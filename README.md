@@ -1,13 +1,35 @@
 # qBittorrent Remote Client
 
+[![CI/CD Pipeline](https://github.com/ryanlong1004/qbittorrent-remote-client/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/ryanlong1004/qbittorrent-remote-client/actions/workflows/ci-cd.yml)
+[![codecov](https://codecov.io/gh/ryanlong1004/qbittorrent-remote-client/branch/main/graph/badge.svg)](https://codecov.io/gh/ryanlong1004/qbittorrent-remote-client)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
+[![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+[![GitHub issues](https://img.shields.io/github/issues/ryanlong1004/qbittorrent-remote-client)](https://github.com/ryanlong1004/qbittorrent-remote-client/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/ryanlong1004/qbittorrent-remote-client)](https://github.com/ryanlong1004/qbittorrent-remote-client/pulls)
+
 A Python-based command-line tool for remotely managing qBittorrent instances via the Web API.
+
+## Project Status
+
+🚀 **Active Development** - This project is actively maintained with comprehensive CI/CD pipeline
+
+- ✅ **Tests**: 34/37 passing (92% pass rate) with 72% code coverage
+- ✅ **CI/CD**: Multi-Python testing (3.9-3.12) with automated quality checks
+- ✅ **Security**: Automated vulnerability scanning with Bandit
+- ✅ **Code Quality**: Black formatting, isort imports, mypy type checking
+- ✅ **Branch Protection**: Main branch protected with required status checks
+- ✅ **Documentation**: Comprehensive README with usage examples
 
 ## Features
 
 - 🖥️ **Comprehensive Status Dashboard** - Real-time monitoring with rich formatted display
 - 📋 **List and Filter Torrents** - View torrents with detailed information and filtering
 - ➕ **Add Torrents** - From magnet links, URLs, or torrent files
-- ⏸️ **Control Torrents** - Pause, resume, and delete operations
+- ⏸️ **Control Torrents** - Pause, resume, and delete operationsgit sta
 - 🗑️ **Bulk Operations** - Delete torrents by status (error, missingFiles, etc.)
 - 📊 **Transfer Statistics** - Global transfer info and session statistics
 - 🔄 **Auto-refresh Mode** - Real-time monitoring with configurable refresh intervals
