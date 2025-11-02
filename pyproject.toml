@@ -5,9 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "qbittorrent-remote-client"
 version = "0.1.0"
-authors = [
-    {name = "rlong", email = "rlong@example.com"},
-]
+authors = [{ name = "rlong", email = "rlong@example.com" }]
 description = "A Python-based command-line tool for remotely managing qBittorrent instances via the Web API"
 readme = "README.md"
 license = "MIT"
@@ -27,11 +25,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 keywords = ["qbittorrent", "torrent", "remote", "cli", "automation"]
-dependencies = [
-    "click>=8.0.0",
-    "requests>=2.25.0",
-    "rich>=10.0.0",
-]
+dependencies = ["click>=8.0.0", "requests>=2.25.0", "rich>=10.0.0"]
 
 [project.urls]
 Homepage = "https://github.com/ryanlong1004/qbittorrent-remote-client"
