@@ -69,10 +69,7 @@ def example_add_torrent():
     print("\n=== Add Torrent Example ===")
 
     # Example magnet link (Ubuntu ISO)
-    magnet_link = (
-        "magnet:?xt=urn:btih:dd8255ecdc7ca55fb0bbf81323d87062db1f6d1c"
-        "&dn=ubuntu-20.04.3-desktop-amd64.iso"
-    )
+    magnet_link = "magnet:?xt=urn:btih:dd8255ecdc7ca55fb0bbf81323d87062db1f6d1c" "&dn=ubuntu-20.04.3-desktop-amd64.iso"
 
     try:
         client = create_client_from_config("config.json")

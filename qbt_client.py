@@ -79,9 +79,7 @@ def get_state_color(state):
 
 
 @click.group()
-@click.option(
-    "--config", "-c", default="config.json", help="Path to configuration file"
-)
+@click.option("--config", "-c", default="config.json", help="Path to configuration file")
 @click.pass_context
 def cli(ctx, config):
     """qBittorrent Remote Client"""
@@ -118,9 +116,7 @@ def list_torrents(ctx, filter_type, sort, reverse):
     client = ctx.obj["client"]
 
     try:
-        torrents = client.get_torrents(
-            filter_type=filter_type, sort=sort, reverse=reverse
-        )
+        torrents = client.get_torrents(filter_type=filter_type, sort=sort, reverse=reverse)
 
         if not torrents:
             console.print("[yellow]No torrents found[/yellow]")
@@ -170,13 +166,9 @@ def add(ctx, source, path, category, paused):
 
     try:
         if source.startswith(("magnet:", "http://", "https://")):
-            success = client.add_torrent_url(
-                source, save_path=path or "", category=category or "", paused=paused
-            )
+            success = client.add_torrent_url(source, save_path=path or "", category=category or "", paused=paused)
         else:
-            success = client.add_torrent_file(
-                source, save_path=path or "", category=category or "", paused=paused
-            )
+            success = client.add_torrent_file(source, save_path=path or "", category=category or "", paused=paused)
 
         if success:
             console.print("[green]Torrent added successfully[/green]")
@@ -263,17 +255,13 @@ def delete_by_status(ctx, status, delete_files, dry_run, yes):
     try:
         # Get all torrents and filter by status
         all_torrents = client.get_torrents()
-        matching_torrents = [
-            t for t in all_torrents if t.get("state", "").lower() == status.lower()
-        ]
+        matching_torrents = [t for t in all_torrents if t.get("state", "").lower() == status.lower()]
 
         if not matching_torrents:
             console.print(f"[yellow]No torrents found with status '{status}'[/yellow]")
             return
 
-        console.print(
-            f"[cyan]Found {len(matching_torrents)} torrents with status '{status}':[/cyan]"
-        )
+        console.print(f"[cyan]Found {len(matching_torrents)} torrents with status '{status}':[/cyan]")
 
         # Show what will be deleted
         table = Table(show_header=True, header_style="bold magenta")
@@ -283,9 +271,7 @@ def delete_by_status(ctx, status, delete_files, dry_run, yes):
 
         for torrent in matching_torrents:
             table.add_row(
-                torrent["name"][:47] + "..."
-                if len(torrent["name"]) > 50
-                else torrent["name"],
+                torrent["name"][:47] + "..." if len(torrent["name"]) > 50 else torrent["name"],
                 format_size(torrent["size"]),
                 torrent.get("state", "unknown"),
             )
@@ -293,9 +279,7 @@ def delete_by_status(ctx, status, delete_files, dry_run, yes):
         console.print(table)
 
         if dry_run:
-            console.print(
-                f"\n[yellow]DRY RUN: Would delete {len(matching_torrents)} torrents[/yellow]"
-            )
+            console.print(f"\n[yellow]DRY RUN: Would delete {len(matching_torrents)} torrents[/yellow]")
             return
 
         # Confirm deletion
@@ -316,13 +300,9 @@ def delete_by_status(ctx, status, delete_files, dry_run, yes):
             success = client.delete_torrents(batch, delete_files=delete_files)
             if success:
                 deleted_count += len(batch)
-                console.print(
-                    f"[green]Deleted batch {i // batch_size + 1}: {len(batch)} torrents[/green]"
-                )
+                console.print(f"[green]Deleted batch {i // batch_size + 1}: {len(batch)} torrents[/green]")
             else:
-                console.print(
-                    f"[red]Failed to delete batch {i // batch_size + 1}[/red]"
-                )
+                console.print(f"[red]Failed to delete batch {i // batch_size + 1}[/red]")
 
         action_past = "deleted with files" if delete_files else "removed"
         console.print(
@@ -381,56 +361,34 @@ def status(ctx, refresh):
             if refresh:
                 console.clear()
 
-            console.print(
-                "[bold blue]═══ qBittorrent Status Dashboard ═══[/bold blue]\n"
-            )
+            console.print("[bold blue]═══ qBittorrent Status Dashboard ═══[/bold blue]\n")
 
             # Server Information
-            server_table = Table(
-                title="🖥️  Server Information", show_header=False, box=None
-            )
+            server_table = Table(title="🖥️  Server Information", show_header=False, box=None)
             server_table.add_column("Field", style="cyan", width=20)
             server_table.add_column("Value", style="green")
 
             server_table.add_row("Version", version)
             server_table.add_row("Connection", f"{client.host}:{client.port}")
-            server_table.add_row(
-                "Protocol", "HTTPS" if client.base_url.startswith("https") else "HTTP"
-            )
+            server_table.add_row("Protocol", "HTTPS" if client.base_url.startswith("https") else "HTTP")
 
             console.print(server_table)
             console.print()
 
             # Transfer Statistics
-            transfer_table = Table(
-                title="📊 Transfer Statistics", show_header=False, box=None
-            )
+            transfer_table = Table(title="📊 Transfer Statistics", show_header=False, box=None)
             transfer_table.add_column("Metric", style="cyan", width=20)
             transfer_table.add_column("Value", style="green")
 
-            transfer_table.add_row(
-                "Download Speed", format_speed(transfer_info["dl_info_speed"])
-            )
-            transfer_table.add_row(
-                "Upload Speed", format_speed(transfer_info["up_info_speed"])
-            )
-            transfer_table.add_row(
-                "Session Downloaded", format_size(transfer_info["dl_info_data"])
-            )
-            transfer_table.add_row(
-                "Session Uploaded", format_size(transfer_info["up_info_data"])
-            )
-            transfer_table.add_row(
-                "All-time Downloaded", format_size(transfer_info.get("alltime_dl", 0))
-            )
-            transfer_table.add_row(
-                "All-time Uploaded", format_size(transfer_info.get("alltime_ul", 0))
-            )
+            transfer_table.add_row("Download Speed", format_speed(transfer_info["dl_info_speed"]))
+            transfer_table.add_row("Upload Speed", format_speed(transfer_info["up_info_speed"]))
+            transfer_table.add_row("Session Downloaded", format_size(transfer_info["dl_info_data"]))
+            transfer_table.add_row("Session Uploaded", format_size(transfer_info["up_info_data"]))
+            transfer_table.add_row("All-time Downloaded", format_size(transfer_info.get("alltime_dl", 0)))
+            transfer_table.add_row("All-time Uploaded", format_size(transfer_info.get("alltime_ul", 0)))
 
             if transfer_info.get("global_ratio"):
-                transfer_table.add_row(
-                    "Global Ratio", f"{transfer_info['global_ratio']:.2f}"
-                )
+                transfer_table.add_row("Global Ratio", f"{transfer_info['global_ratio']:.2f}")
 
             console.print(transfer_table)
             console.print()
@@ -451,9 +409,7 @@ def status(ctx, refresh):
                 if torrent.get("upspeed", 0) > 0:
                     active_uploads += 1
 
-            overview_table = Table(
-                title="📚 Torrent Overview", show_header=False, box=None
-            )
+            overview_table = Table(title="📚 Torrent Overview", show_header=False, box=None)
             overview_table.add_column("Metric", style="cyan", width=20)
             overview_table.add_column("Value", style="green")
 
@@ -475,9 +431,7 @@ def status(ctx, refresh):
 
                 total_torrents = len(torrents)
                 for state, count in sorted(status_counts.items()):
-                    percentage = (
-                        (count / total_torrents) * 100 if total_torrents > 0 else 0
-                    )
+                    percentage = (count / total_torrents) * 100 if total_torrents > 0 else 0
 
                     # Color code the status
                     if state in ["downloading", "uploading"]:
@@ -499,11 +453,7 @@ def status(ctx, refresh):
                 console.print()
 
             # Recent Activity (Top 5 most active torrents)
-            active_torrents = [
-                t
-                for t in torrents
-                if t.get("dlspeed", 0) > 0 or t.get("upspeed", 0) > 0
-            ]
+            active_torrents = [t for t in torrents if t.get("dlspeed", 0) > 0 or t.get("upspeed", 0) > 0]
 
             if active_torrents:
                 # Sort by combined speed
@@ -512,9 +462,7 @@ def status(ctx, refresh):
                     reverse=True,
                 )
 
-                activity_table = Table(
-                    title="🚀 Most Active Torrents", show_header=True
-                )
+                activity_table = Table(title="🚀 Most Active Torrents", show_header=True)
                 activity_table.add_column("Name", style="cyan", max_width=40)
                 activity_table.add_column("Progress", style="green", justify="right")
                 activity_table.add_column("Down Speed", style="blue", justify="right")
@@ -542,9 +490,7 @@ def status(ctx, refresh):
                 console.print(activity_table)
 
             if refresh:
-                console.print(
-                    f"\n[dim]Refreshing every {refresh} seconds. Press Ctrl+C to stop.[/dim]"
-                )
+                console.print(f"\n[dim]Refreshing every {refresh} seconds. Press Ctrl+C to stop.[/dim]")
 
         except QBittorrentError as e:
             console.print(f"[red]Error getting status: {e}[/red]")
