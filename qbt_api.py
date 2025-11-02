@@ -148,10 +148,13 @@ class QBittorrentAPI:
 
         params = {
             "filter": filter_type,
-            "category": category,
             "sort": sort,
             "reverse": reverse,
         }
+
+        # Only add category if it's not empty
+        if category:
+            params["category"] = category
 
         try:
             response = self.session.get(
