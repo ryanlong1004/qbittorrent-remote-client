@@ -12,6 +12,17 @@ extend-ignore = ["E203", "W503"]
 
 [tool.pylint]
 max-line-length = 120
+max-args = 10
+max-attributes = 10
+max-branches = 20
+
+[tool.pylint.messages_control]
+disable = [
+    "too-many-arguments",
+    "too-many-instance-attributes",
+    "too-many-branches",
+    "too-many-positional-arguments",
+]
 
 [build-system]
 requires = ["setuptools>=45", "wheel"]

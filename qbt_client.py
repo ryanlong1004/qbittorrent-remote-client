@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
+"""
+qBittorrent Remote Client
+
+A command-line interface for managing qBittorrent instances remotely via the Web API.
+Provides commands for listing, adding, pausing, resuming, and deleting torrents.
+"""
+
+import sys
 
 import click
-import sys
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 
-from qbt_api import create_client_from_config
+from qbt_api import create_client_from_config, QBittorrentError
 
 
 console = Console()
@@ -72,7 +79,9 @@ def get_state_color(state):
 
 
 @click.group()
-@click.option("--config", "-c", default="config.json", help="Path to configuration file")
+@click.option(
+    "--config", "-c", default="config.json", help="Path to configuration file"
+)
 @click.pass_context
 def cli(ctx, config):
     """qBittorrent Remote Client"""
@@ -83,7 +92,7 @@ def cli(ctx, config):
         console.print(f"[red]Config file not found: {config}[/red]")
         console.print("Please copy config.example.json to config.json and edit it")
         sys.exit(1)
-    except Exception as e:
+    except QBittorrentError as e:
         console.print(f"[red]Error loading config: {e}[/red]")
         sys.exit(1)
 
@@ -109,7 +118,9 @@ def list_torrents(ctx, filter_type, sort, reverse):
     client = ctx.obj["client"]
 
     try:
-        torrents = client.get_torrents(filter_type=filter_type, sort=sort, reverse=reverse)
+        torrents = client.get_torrents(
+            filter_type=filter_type, sort=sort, reverse=reverse
+        )
 
         if not torrents:
             console.print("[yellow]No torrents found[/yellow]")
@@ -143,7 +154,7 @@ def list_torrents(ctx, filter_type, sort, reverse):
         console.print(table)
         console.print(f"\n[bold]Total: {len(torrents)} torrents[/bold]")
 
-    except Exception as e:
+    except QBittorrentError as e:
         console.print(f"[red]Error listing torrents: {e}[/red]")
 
 
@@ -159,16 +170,20 @@ def add(ctx, source, path, category, paused):
 
     try:
         if source.startswith(("magnet:", "http://", "https://")):
-            success = client.add_torrent_url(source, save_path=path or "", category=category or "", paused=paused)
+            success = client.add_torrent_url(
+                source, save_path=path or "", category=category or "", paused=paused
+            )
         else:
-            success = client.add_torrent_file(source, save_path=path or "", category=category or "", paused=paused)
+            success = client.add_torrent_file(
+                source, save_path=path or "", category=category or "", paused=paused
+            )
 
         if success:
             console.print("[green]Torrent added successfully[/green]")
         else:
             console.print("[red]Failed to add torrent[/red]")
 
-    except Exception as e:
+    except QBittorrentError as e:
         console.print(f"[red]Error adding torrent: {e}[/red]")
 
 
@@ -185,7 +200,7 @@ def pause(ctx, hashes):
             console.print(f"[green]Paused {len(hashes)} torrent(s)[/green]")
         else:
             console.print("[red]Failed to pause torrents[/red]")
-    except Exception as e:
+    except QBittorrentError as e:
         console.print(f"[red]Error pausing torrents: {e}[/red]")
 
 
@@ -202,7 +217,7 @@ def resume(ctx, hashes):
             console.print(f"[green]Resumed {len(hashes)} torrent(s)[/green]")
         else:
             console.print("[red]Failed to resume torrents[/red]")
-    except Exception as e:
+    except QBittorrentError as e:
         console.print(f"[red]Error resuming torrents: {e}[/red]")
 
 
@@ -222,7 +237,7 @@ def delete(ctx, hashes, delete_files):
             console.print(f"[green]{len(hashes)} torrent(s) {action}[/green]")
         else:
             console.print("[red]Failed to delete torrents[/red]")
-    except Exception as e:
+    except QBittorrentError as e:
         console.print(f"[red]Error deleting torrents: {e}[/red]")
 
 
@@ -251,7 +266,7 @@ def stats(ctx):
 
         console.print(table)
 
-    except Exception as e:
+    except QBittorrentError as e:
         console.print(f"[red]Error getting statistics: {e}[/red]")
 
 
@@ -270,7 +285,7 @@ def interactive(ctx):
 
             if command.lower() in ["quit", "exit", "q"]:
                 break
-            elif command.lower() == "help":
+            if command.lower() == "help":
                 console.print(
                     """
 Available commands:
@@ -314,9 +329,9 @@ Available commands:
 
 
 if __name__ == "__main__":
-    cli()
+    cli()  # pylint: disable=no-value-for-parameter
 
 
 def main():
     """Entry point for console script."""
-    cli()
+    cli()  # pylint: disable=no-value-for-parameter
